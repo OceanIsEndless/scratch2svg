@@ -28,7 +28,7 @@
     <h1>Scratch -> .svg</h1>
     <p>Press the button below to load a Scratch project file from your computer, and a snapshot of the Stage and sprites will be automatically created as an SVG (vector) image!</p>
     <input id="input" type="file" accept=".sb3,.sprite3,.json" multiple><br>
-    <img id="output"></img>
+    <div id="output"></div>
 
     <!-- Actual logic -->
 
@@ -58,7 +58,7 @@
          * @param {object[]} targets
          * @return {SVGSVGElement}
         */
-        async function scratchToSVG(files, targets) {
+        async function scratchToSVG(files, targets, projectName='Untitled') {
 
             /* SET UP PRESET SVG ELEMENTS */
 
@@ -188,7 +188,11 @@
 
             /* OUTPUT THE SVG!! */
 
-            output.src = `data:image/svg+xml;base64,${btoa(svg.outerHTML)}`;
+            const finalImg = document.createElement('img');
+            finalImg.src = `data:image/svg+xml;base64,${btoa(svg.outerHTML)}`;
+            finalImg.alt = projectName;
+            finalImg.title = projectName;
+            output.appendChild(finalImg);
             return svg;
         }
 
@@ -236,6 +240,10 @@
         input.addEventListener('change', function () { // When user chooses file(s)...
             const files = input.files; // Get potential files
             if (files) { // If there are files,
+                while (output.firstChild) { // Remove previously rendered images
+                    output.removeChild(output.firstChild);
+                } // And then proceed with loading...
+
                 for (const file of files) { // For each file
                     const reader = new FileReader(); // Read file contents
                     if (file.name.endsWith('.sb3') || file.name.endsWith('.sprite3')) { // If it's a project or sprite .zip file,
@@ -247,7 +255,7 @@
                                 const project = decoder.decode(projectjson); // decode it back to a string
                                 const projectobj = JSON.parse(project); // parse it as a JSON object
                                 if (Array.isArray(projectobj?.targets)) { // if it exists, has parsed as an object, and has a targets property that is an array
-                                    scratchToSVG(unzipped, projectobj.targets); // run scratchToSVG logic with the asset files and targets array
+                                    scratchToSVG(unzipped, projectobj.targets, file.name); // run scratchToSVG logic with the asset files and targets array
                                 }
                             } else { // Otherwise, if there is no project.json,
                                 const spritejson = unzipped['sprite.json']; // extract sprite.json if available
@@ -255,7 +263,7 @@
                                     const sprite = decoder.decode(spritejson); // decode it back to a string
                                     const spriteobj = JSON.parse(sprite); // parse it as a JSON object
                                     if (spriteobj && typeof spriteobj === "object") { // if it exists and has parsed as an object
-                                        scratchToSVG(unzipped, [spriteobj]); // run scratchToSVG logic with the asset files and one target
+                                        scratchToSVG(unzipped, [spriteobj], file.name); // run scratchToSVG logic with the asset files and one target
                                     }
                                 } else { // Otherwise, there is nothing to be done.
                                     // Oof
@@ -269,9 +277,9 @@
                             const json = decoder.decode(result); // decode it back to a string
                             const obj = JSON.parse(json); // parse it as JSON
                             if (Array.isArray(obj?.targets)) { // if there is a targets array, this is a project.json file
-                                scratchToSVG({ 'project.json': result }, obj.targets); // run scratchToSVG logic with project.json file and targets array
+                                scratchToSVG({ 'project.json': result }, obj.targets, file.name); // run scratchToSVG logic with project.json file and targets array
                             } else if (obj && typeof obj === "object") { // Otherwise, if it's still a parseable JSON object, assume it's a sprite.json file
-                                scratchToSVG({ 'sprite.json': result }, [obj]); // run scratchToSVG logic with sprite.json file and one target
+                                scratchToSVG({ 'sprite.json': result }, [obj], file.name); // run scratchToSVG logic with sprite.json file and one target
                             } else { // Otherwise, there is nothing to be done.
                                 // Cry
                             }
