@@ -170,29 +170,15 @@
 
             const fonts = []; // List of font families loaded
             const styles = []; // List of styles applied in order to embed the fonts
-            for (const text of svg.querySelectorAll('text')) { // For each <text> SVG element...
-                if (text.hasAttribute('font-family')) { // If it has a font-family...
-                    const fontfam = text.getAttribute('font-family'); // Get the font-family
+            for (const elem of [svg, ...svg.querySelectorAll('*')]) { // For each SVG element...
+                if (elem.hasAttribute('font-family')) { // If it has a font-family...
+                    const fontfam = elem.getAttribute('font-family'); // Get the font-family
                     if (FONT_NAMES.includes(fontfam) && !fonts.includes(fontfam)) { // If that font-family happens to be one we have preset AND we have not embedded that font for use yet...
                         styles.push(`@font-face {
     font-family: "${fontfam}";
     src: url("${FONTS[fontfam]}");
 }`                      ); // Generate a @font-face CSS thingymabobber and add it to the styles list (it will be put into a <style> element later)
                         fonts.push(fontfam); // Add the font-family to the fonts list to make sure we don't add it multiple times
-                    }
-                } else if (!fonts.includes(null)) { // Otherwise, if there is no font-family, and we have not added a default font yet...
-                    const dfltfontfam = 'Sans Serif'; // Select a default font to load (this is the one Scratch uses I think)
-                    styles.push(`text {
-    font-family: "${dfltfontfam}"
-}`                  ); // Apply the default font-family to text
-                    fonts.push(null); // Add it to the list so that we don't readd the default font applier
-
-                    if (!fonts.includes(dfltfontfam) && FONT_NAMES.includes(dfltfontfam)) { // If the default font we applied has not been embedded yet AND it's one we have preset...
-                        styles.push(`@font-face {
-    font-family: "${dfltfontfam}";
-    src: url("${FONTS[dfltfontfam]}");
-}`                      ); // Embed it in
-                        fonts.push(dfltfontfam); // Add it to the font list since we have now embedded it so as not to embed it multiple times
                     }
                 }
             }
