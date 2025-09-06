@@ -38,19 +38,52 @@ Some of these things are probably unnecessary and might not even happen if I fin
       - [ ] `.sprite` (Scratch 1.x sprite)
     - [ ] `.scratch` (Scratch 0.x project)
       - Because why not
+    - [ ] [Packaged projects](https://packager.turbowarp.org) (via the [Unpackager](https://turbowarp.github.io/unpackager/))
   - [ ] External websites
-    - [ ] [Scratch website](https://scratch.mit.edu)
-    - [ ] [share.turbowarp.org](https://share.turbowarp.org)
-    - [ ] [scratchbox](https://github.com/ScratchEverywhere/scratchbox)
     - [ ] Custom URL
+    - [ ] [Scratch website](https://scratch.mit.edu)
+    - [ ] [Placeholder](https://share.turbowarp.org)
+    - [ ] [ScratchBox](https://github.com/ScratchEverywhere/scratchbox)
+- [ ] Turn it into a Scratch Addon and/or add a project player to the tool page so that projects can be saved while they're running
+  - Useful because a lot of stuff only exists at runtime and isn't saved in the project file such as clones
+  - [ ] Implement baseline functionality (generate thumbnail from targets as usual)
+    - The difference is, it has to load the data from the Scratch VM instead
+  - [ ] Support clones
+  - [ ] Support pen layer
+    - [ ] Support high quality pen maybe...???!?!
+      - It would somehow read or save the pen layer in a vector format. Could be done while the project is running (record changes to the pen layer and then vectorize), or accessed directly through the Scratch VM if such data is saved in the runtime (if the runtime doesn't remember what changes were made then the former option is likely the only way to support this)
+  - [ ] Support graphic effects
+    - Challenging to vectorize, and may require two different implementations between bitmap/vector costumes depending on how I go about it
+    - [ ] Color effect
+      - [ ] Black and white when color effect is `Infinity`
+    - [ ] Fisheye effect
+      - [ ] Backwards
+    - [ ] Whirl effect
+      - [ ] Backwards
+    - [ ] Pixelate effect
+    - [ ] Mosaic effect
+    - [ ] Brightness effect
+    - [ ] Ghost effect (probably the easiest)
+  - [ ] Support say/think bubbles
+    - Their appearance will have to be recreated in a vector format
+    - [ ] Say bubble
+    - [ ] Think bubble
+  - [ ] Support variable monitors
+    - Their appearance will have to be recreated in a vector format
+    - [ ] Normal readout
+    - [ ] Large readout
+    - [ ] List monitor
+    - [ ] Slider
 - [ ] Go crazy and add an option to embed &lt;script&gt; tags that will make the project functional!!1!... somehow
   - [ ] Embed all assets when enabled (since it will actually be functional)
   - [ ] Port Scratch Everywhere! to... SVG?? 😵‍💫
   - [ ] Make sure everything works OK
     - On a level that is "good enough"
+  - This might not actually happen but worth a shot?...
+- [ ] 🎉 Maybe make it more modular for use elsewhere or something idk but DONE!
 
 ## Credits
 
 The conversion code uses [UZIP](https://github.com/photopea/UZIP.js) to unzip any zipped project files passed as input.
 
-The [Scratch Wiki](https://scratch-wiki.info) was used as reference for some stuff. (E.g. how to read the [Scratch File Format](https://en.scratch-wiki.info/wiki/Scratch_File_Format). <small>I know, I know. Shame on me for not writing the [Scratch spec](https://oceanisendless.github.io/scratch-spec/) already. It's coming soon though! Don't you worry... yet.)
+The [Scratch Wiki](https://scratch-wiki.info) was used as reference for some stuff. (E.g. how to read the [Scratch File Format](https://en.scratch-wiki.info/wiki/Scratch_File_Format). <small>I know, I know. Shame on me for not writing the [Scratch spec](https://oceanisendless.github.io/scratch-spec/) already. It's coming soon though! Don't you worry... yet.</small>)
