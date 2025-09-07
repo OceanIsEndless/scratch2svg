@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "rootDir": "src",
+    "outDir": "docs",
+    "allowJs": true
+  }
+}

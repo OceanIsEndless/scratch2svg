@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>scratch2svg</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: white;
+            color: #000000;
+        }
+
+        #output > img {
+            margin: 15px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: black;
+                color: #eeeeee;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- interface -->
+
+    <h1>Scratch -> .svg</h1>
+    <p>Press the button below to load a Scratch project file from your computer, and a snapshot of the Stage and sprites will be automatically created as an SVG (vector) image!</p>
+    <input id="input" type="file" accept=".sb3,.sprite3,.json" multiple><br>
+    <div id="output"></div>
+
+    <!-- logic -->
+
+    <script src="script.js" type="module"></script>
+</body>
+
+</html>
