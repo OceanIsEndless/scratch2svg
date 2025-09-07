@@ -309,6 +309,8 @@ if (input && input.tagName === 'INPUT') {
                     }
                 }
             }
+
+            (input as HTMLInputElement).value = ''; // Clear file input to make room for any future inputs
         }
     });
 }

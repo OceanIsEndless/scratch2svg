@@ -401,6 +401,7 @@ if (input && input.tagName === 'INPUT') {
                     };
                 }
             }
+            input.value = ''; // Clear file input to make room for any future inputs
         }
     });
 }
