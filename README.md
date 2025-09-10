@@ -14,17 +14,33 @@ Then this is the tool for you!
 
 ## Roadmap
 
-Some of these things are probably unnecessary and might not even happen if I find something better to do with my life, but I guess it's good to stay committed. :|
+Some of these things are probably unnecessary and might not even happen if I find something better to do with my life, but I guess it's good to stay committed. :]
 
 - [X] Vector costume support
-  - [X] ~~Fix positioning bug ([#1](https://github.com/OceanIsEndless/scratch2svg/issues/1))~~
-- [ ] Bitmap costume support
-- [ ] Various configuration options
-  - [ ] Allow exporting without fonts embedded (for use in Scratch)
-  - [ ] Allow exporting with or without the default white background
-  - [ ] Allow overriding the stage width and height
-    - [ ] Automatically detect custom stage bounds from \_twconfig\_ comment
+- [X] Bitmap costume support
+- [ ] Implement various options to meet different needs
+  - [ ] Don't embed fonts (for use in Scratch since it already has the fonts)
+  - [ ] Transparent background and custom background color
+  - [ ] Stage width and height
+    - [ ] Detect stage size from \_twconfig\_ comment
+  - [ ] Convert known bitmap costumes to vector
+    - E.g. assets from the Scratch costume library that were converted to bitmap or are outdated and have a vector version available
+    - Possibly disabled by default due to it being inaccurate to the original
+  - [ ] Allow embedding metadata into the SVG
+    - [ ] Accessibility info (e.g. title, description)
+    - [ ] scratch2svg data (e.g. project source, tool config, notes on conversion)
+    - [ ] Project  stuff (e.g. target/costume names, creator username, notes)
+    - [ ] Full project files ("lossless" scratch2svg conversion)
+    - [ ] Custom metadata
+      - Whatever the user wants to throw in there I guess?
   - [ ] Provide more configuration options as needed
+- [ ] Refine final image
+  - [ ] Optimize storage space
+    - [ ] Shrink fonts
+      - [ ] Choose fonts to use in place of Scratch ones (URL, web safe fonts)
+      - [ ] Subset fonts (only include letters that are used by the project)
+  - [ ] Make sure it follows SVG semantics
+    - [ ] Accessibility things
 - [ ] Support loading projects from as many sources as possible ("for fun")
   - [ ] Local files
     - [X] `.sb3` (Scratch 3 project .zip)
@@ -45,7 +61,30 @@ Some of these things are probably unnecessary and might not even happen if I fin
     - [ ] Custom URL
     - [ ] [Scratch website](https://scratch.mit.edu)
     - [ ] [Placeholder](https://share.turbowarp.org)
-    - [ ] [ScratchBox](https://github.com/ScratchEverywhere/scratchbox)
+    - [ ] [ScratchBox](https://github.com/ScratchEverywhere/ScratchBox)
+  - [ ] Improve upload interface
+    - [ ] Allow dragging and dropping files/links anywhere on the page
+    - [ ] Make a simple settings window for configuring the final images
+    - [ ] Show buttons for interacting with generated SVGs (e.g. download)
+- [ ] Allow including variable monitors
+  - Their appearances will have to be recreated in a vector format
+  - It might also be cool to be able to choose a Scratch version for it to look like and/or have it automatically determine appearance based on the version of Scratch the project was created in
+    - [ ] Normal readout
+      - [ ] Scratch 3
+      - [ ] Scratch 2
+      - [ ] Scratch 1
+    - [ ] Large readout
+      - [ ] Scratch 3
+      - [ ] Scratch 2
+      - [ ] Scratch 1
+    - [ ] List monitor
+      - [ ] Scratch 3
+      - [ ] Scratch 2
+      - [ ] Scratch 1
+    - [ ] Slider
+      - [ ] Scratch 3
+      - [ ] Scratch 2
+      - [ ] Scratch 1
 - [ ] Turn it into a Scratch Addon and/or add a project player to the tool page so that projects can be saved while they're running
   - Useful because a lot of stuff only exists at runtime and isn't saved to the project file such as clones
   - [ ] Implement baseline functionality (generate thumbnail from targets as usual)
@@ -71,13 +110,14 @@ Some of these things are probably unnecessary and might not even happen if I fin
   - [ ] Support say/think bubbles
     - Their appearances will have to be recreated in a vector format
     - [ ] Say bubble
+      - [ ] Scratch 3
+      - [ ] Scratch 2
+      - [ ] Scratch 1
     - [ ] Think bubble
-  - [ ] Support variable monitors
-    - Their appearances will have to be recreated in a vector format
-    - [ ] Normal readout
-    - [ ] Large readout
-    - [ ] List monitor
-    - [ ] Slider
+      - [ ] Scratch 3
+      - [ ] Scratch 2
+      - [ ] Scratch 1
+  - [ ] Support showing/hiding monitors
 - [ ] Go crazy and add an option to embed &lt;script&gt; tags that will make the project functional!!1!... somehow
   - [ ] Embed all assets when enabled (since it will actually be functional)
   - [ ] Port Scratch Everywhere! to... SVG?? 😵‍💫

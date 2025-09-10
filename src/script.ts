@@ -42,6 +42,7 @@ interface Target {
     direction?: number;
     size?: number;
     rotationStyle?: "all around" | "left-right" | "don't rotate";
+    layerOrder?: number;
 }
 
 interface Project {
@@ -64,7 +65,7 @@ class ScratchSVGThumbnail {
 
             const parsedWidth = parsedSVG.getAttribute('width');
             if (parsedWidth !== null) { // If the svg had a width attribute...
-                symbol.setAttribute('width', parsedWidth); // Attach it to the <symbol> for... well idk why lol, maybe not needed, could remove
+                symbol.setAttribute('width', parsedWidth); // Attach it to the <symbol>
             }
 
             const parsedHeight = parsedSVG.getAttribute('height');
@@ -72,24 +73,17 @@ class ScratchSVGThumbnail {
                 symbol.setAttribute('height', parsedHeight); // Also attach it to the <symbol>
             }
 
-            const parsedViewBox = parsedSVG.getAttribute('viewBox');
+            /* const parsedViewBox = parsedSVG.getAttribute('viewBox');
             if (parsedViewBox !== null) { // If the svg had a viewBox attribute...
-                symbol.setAttribute('viewBox', parsedViewBox); // Definitely attach it to the <symbol> (pretty sure this one is necessary)
-            }
+                symbol.setAttribute('viewBox', parsedViewBox); // Maybe attach it to the <symbol>
+            } */
 
-            for (const c of parsedSVG.children) { // For each SVG element in the costume...
-                symbol.appendChild(c); // Add it to the costume defintion (<symbol>)
+            while (parsedSVG.firstChild) { // For each SVG element in the costume...
+                symbol.appendChild(parsedSVG.firstChild); // Add it to the costume defintion (<symbol>)
             }
         } else { // Otherwise, if it's a raster image (probably a raster image, or any other type of image)
             const image = document.createElementNS('http://www.w3.org/2000/svg', 'image'); // Create an <image> element to render it with
-            const blob = new Blob([file], { type: `image/${key.split('.').pop()}` }); // Make a blob out of the image file so we can turn it into a data URI and embed it directly into the <image> element
-            const reader = new FileReader(); // Make a FileReader to read the blob
-            reader.readAsDataURL(blob); // Get the data URI
-
-            reader.onload = function () { // When/if the data uri is successfully produced...
-                image.setAttribute('href', '' + reader.result); // Use it with the <image> element so that it will render and be stored in the SVG
-            };
-
+            image.setAttribute('href', `data:image/${key.split('.').pop()};base64,${btoa(file.reduce<string>((acc,v)=>acc+String.fromCharCode(v),''))}`); // Give it the image file as a data uri
             symbol.appendChild(image); // Add the <image> element to the <symbol> so it will be included
         }
         return symbol; // Return the costume-turned-symbol back to the caller
@@ -117,9 +111,14 @@ class ScratchSVGThumbnail {
 
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); // Create <svg> element, which will hold everything in the image
         svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); // Make sure it follows <svg> standards (I think that's what that means :)
+        svg.setAttribute('role', 'img');
         svg.setAttribute('width', '' + this.width); // Will be overriden by ' // _twconfig_' if needed
         svg.setAttribute('height', '' + this.height); // Will be overriden by ' // _twconfig_' if needed
         svg.setAttribute('viewbox', '-240 -180 480 360'); // Will be overriden by ' // _twconfig_' if needed
+
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = this.name;
+        svg.appendChild(title);
 
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs'); // Create <defs> element, which will hold any costumes needed for rendering (reusable)
         svg.appendChild(defs); // Append <defs> to the <svg> so that any costume definitions added to it will be available for <use> in the image
@@ -132,8 +131,12 @@ class ScratchSVGThumbnail {
 
         /* EMBED RELEVANT COSTUMES AND USE THEM */
 
-        const symbols = {};
-        for (const target of this.targets) { // For each target (stage/sprites)...
+        const symbols: {[key: string]: SVGSymbolElement} = {};
+        
+        const sortedTargets = []; // Sort the targets by layerOrder to respect layering
+        this.targets.forEach((v)=>sortedTargets.splice(v.layerOrder??sortedTargets.length,0,v));
+
+        for (const target of sortedTargets) { // For each target (stage/sprites)...
             if (Array.isArray(target.costumes) && target.costumes.length > 0 && (target.visible ?? true)) { // If it has a list of costumes present, has at least one costume available, and is visible...
                 const costumeNum = Math.min(Math.max(target.currentCostume ?? 0, 0), target.costumes.length - 1); // Calculate the index of the current costume in the costumes list.
                 const costumeObj = target.costumes[costumeNum]; // Get the costume object, containing data about the costume.
@@ -170,17 +173,17 @@ class ScratchSVGThumbnail {
 
                         const x = Number(target.x ?? 0); // Get the x position of the target
                         const y = Number(target.y ?? 0); // Get the y position of the target
-                        const res = Number(costumeObj.bitmapResolution ?? 1); // Get the resolution of the costume
+                        const res = Number(costumeObj.bitmapResolution ?? (symbol.querySelector('image') ? 2 : 1)); // Get the resolution of the costume
                         const rx = Number(costumeObj.rotationCenterX ?? 0 /* TODO: Do whatever Scratch does when omitted */); // Get the rotation center x of the costume
                         const ry = Number(costumeObj.rotationCenterY ?? 0 /* TODO: Do whatever Scratch does when omitted */); // Get the rotation center y of the costume
                         const rotStyle = target.rotationStyle ?? "all around"; // Get the rotation style of the target
                         const direction = Number(target.direction ?? 90); // Get the direction of the target
                         const size = Number(target.size ?? 100); // Get the size of the target
 
-                        const vrx = this.width / 2 * res - rx + x; // Compute the rotation center x of the target on the SVG coordinate plane
-                        const vry = this.height / 2 * res - ry - y; // Compute the rotation center y of the target on the SVG coordinate plane
-                        const vx = this.width / 2 * res + x; // Compute the x position of the target on the SVG coordinate plane
-                        const vy = this.height / 2 * res - y; // Compute the y position of the target on the SVG coordinate plane
+                        const vrx = this.width / 2 - rx + x; // Compute the rotation center x of the target on the SVG coordinate plane
+                        const vry = this.height / 2 - ry - y; // Compute the rotation center y of the target on the SVG coordinate plane
+                        const vx = this.width / 2 + x; // Compute the x position of the target on the SVG coordinate plane
+                        const vy = this.height / 2 - y; // Compute the y position of the target on the SVG coordinate plane
 
                         use.setAttribute('x', '' + vrx); // Set the rendered x position
                         use.setAttribute('y', '' + vry); // Set the rendered y position
@@ -191,12 +194,12 @@ class ScratchSVGThumbnail {
                             transform.push(`rotate(${direction - 90},${vx},${vy})`); // Rotate it!
                         }
 
-                        if (size !== 1) { // If the target is not exactly its normal size...
+                        if (size !== 100) { // If the target is not exactly its normal size...
                             transform.push(`translate(${vx},${vy})`); // Move it over to the right position
                             if (rotStyle === "left-right" && direction < 0) {
-                                transform.push(`scale(-${size / 100},${size / 100})`);
+                                transform.push(`scale(-${size / (res * 100)},${size / (res * 100)})`);
                             } else {
-                                transform.push(`scale(${size / 100})`); // Scale it from that position
+                                transform.push(`scale(${size / (res * 100)})`); // Scale it from that position
                             }
                             
                             transform.push(`translate(${-vx},${-vy})`); // Move it back to the previous position

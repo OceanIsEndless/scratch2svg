@@ -180,28 +180,23 @@ class ScratchSVGThumbnail {
             const parsedSVG = new DOMParser().parseFromString(decoder.decode(file), "image/svg+xml").documentElement; // Parse it so that we can embed it into the .svg directly (could maybe just use <image>, but this is more fun!?)
             const parsedWidth = parsedSVG.getAttribute('width');
             if (parsedWidth !== null) { // If the svg had a width attribute...
-                symbol.setAttribute('width', parsedWidth); // Attach it to the <symbol> for... well idk why lol, maybe not needed, could remove
+                symbol.setAttribute('width', parsedWidth); // Attach it to the <symbol>
             }
             const parsedHeight = parsedSVG.getAttribute('height');
             if (parsedHeight !== null) { // If the svg had a height attribute...
                 symbol.setAttribute('height', parsedHeight); // Also attach it to the <symbol>
             }
-            const parsedViewBox = parsedSVG.getAttribute('viewBox');
+            /* const parsedViewBox = parsedSVG.getAttribute('viewBox');
             if (parsedViewBox !== null) { // If the svg had a viewBox attribute...
-                symbol.setAttribute('viewBox', parsedViewBox); // Definitely attach it to the <symbol> (pretty sure this one is necessary)
-            }
-            for (const c of parsedSVG.children) { // For each SVG element in the costume...
-                symbol.appendChild(c); // Add it to the costume defintion (<symbol>)
+                symbol.setAttribute('viewBox', parsedViewBox); // Maybe attach it to the <symbol>
+            } */
+            while (parsedSVG.firstChild) { // For each SVG element in the costume...
+                symbol.appendChild(parsedSVG.firstChild); // Add it to the costume defintion (<symbol>)
             }
         }
         else { // Otherwise, if it's a raster image (probably a raster image, or any other type of image)
             const image = document.createElementNS('http://www.w3.org/2000/svg', 'image'); // Create an <image> element to render it with
-            const blob = new Blob([file], { type: `image/${key.split('.').pop()}` }); // Make a blob out of the image file so we can turn it into a data URI and embed it directly into the <image> element
-            const reader = new FileReader(); // Make a FileReader to read the blob
-            reader.readAsDataURL(blob); // Get the data URI
-            reader.onload = function () {
-                image.setAttribute('href', '' + reader.result); // Use it with the <image> element so that it will render and be stored in the SVG
-            };
+            image.setAttribute('href', `data:image/${key.split('.').pop()};base64,${btoa(file.reduce((acc, v) => acc + String.fromCharCode(v), ''))}`); // Give it the image file as a data uri
             symbol.appendChild(image); // Add the <image> element to the <symbol> so it will be included
         }
         return symbol; // Return the costume-turned-symbol back to the caller
@@ -226,9 +221,13 @@ class ScratchSVGThumbnail {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); // Create <svg> element, which will hold everything in the image
         svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); // Make sure it follows <svg> standards (I think that's what that means :)
+        svg.setAttribute('role', 'img');
         svg.setAttribute('width', '' + this.width); // Will be overriden by ' // _twconfig_' if needed
         svg.setAttribute('height', '' + this.height); // Will be overriden by ' // _twconfig_' if needed
         svg.setAttribute('viewbox', '-240 -180 480 360'); // Will be overriden by ' // _twconfig_' if needed
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = this.name;
+        svg.appendChild(title);
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs'); // Create <defs> element, which will hold any costumes needed for rendering (reusable)
         svg.appendChild(defs); // Append <defs> to the <svg> so that any costume definitions added to it will be available for <use> in the image
         const bgrect = document.createElementNS('http://http://www.w3.org/2000/svg', 'rect'); // Create a white <rect> as the default background, like in Scratch
@@ -238,7 +237,9 @@ class ScratchSVGThumbnail {
         svg.appendChild(bgrect); // Add it to the <svg> so it will be rendered (later stuff will be appended beneath it so that they render on top of it)
         /* EMBED RELEVANT COSTUMES AND USE THEM */
         const symbols = {};
-        for (const target of this.targets) { // For each target (stage/sprites)...
+        const sortedTargets = []; // Sort the targets by layerOrder to respect layering
+        this.targets.forEach((v) => { var _a; return sortedTargets.splice((_a = v.layerOrder) !== null && _a !== void 0 ? _a : sortedTargets.length, 0, v); });
+        for (const target of sortedTargets) { // For each target (stage/sprites)...
             if (Array.isArray(target.costumes) && target.costumes.length > 0 && ((_a = target.visible) !== null && _a !== void 0 ? _a : true)) { // If it has a list of costumes present, has at least one costume available, and is visible...
                 const costumeNum = Math.min(Math.max((_b = target.currentCostume) !== null && _b !== void 0 ? _b : 0, 0), target.costumes.length - 1); // Calculate the index of the current costume in the costumes list.
                 const costumeObj = target.costumes[costumeNum]; // Get the costume object, containing data about the costume.
@@ -271,29 +272,29 @@ class ScratchSVGThumbnail {
                         use.setAttribute('href', '#' + costumeKey); // Link it to the costume/image file definition
                         const x = Number((_d = target.x) !== null && _d !== void 0 ? _d : 0); // Get the x position of the target
                         const y = Number((_e = target.y) !== null && _e !== void 0 ? _e : 0); // Get the y position of the target
-                        const res = Number((_f = costumeObj.bitmapResolution) !== null && _f !== void 0 ? _f : 1); // Get the resolution of the costume
+                        const res = Number((_f = costumeObj.bitmapResolution) !== null && _f !== void 0 ? _f : (symbol.querySelector('image') ? 2 : 1)); // Get the resolution of the costume
                         const rx = Number((_g = costumeObj.rotationCenterX) !== null && _g !== void 0 ? _g : 0 /* TODO: Do whatever Scratch does when omitted */); // Get the rotation center x of the costume
                         const ry = Number((_h = costumeObj.rotationCenterY) !== null && _h !== void 0 ? _h : 0 /* TODO: Do whatever Scratch does when omitted */); // Get the rotation center y of the costume
                         const rotStyle = (_j = target.rotationStyle) !== null && _j !== void 0 ? _j : "all around"; // Get the rotation style of the target
                         const direction = Number((_k = target.direction) !== null && _k !== void 0 ? _k : 90); // Get the direction of the target
                         const size = Number((_l = target.size) !== null && _l !== void 0 ? _l : 100); // Get the size of the target
-                        const vrx = this.width / 2 * res - rx + x; // Compute the rotation center x of the target on the SVG coordinate plane
-                        const vry = this.height / 2 * res - ry - y; // Compute the rotation center y of the target on the SVG coordinate plane
-                        const vx = this.width / 2 * res + x; // Compute the x position of the target on the SVG coordinate plane
-                        const vy = this.height / 2 * res - y; // Compute the y position of the target on the SVG coordinate plane
+                        const vrx = this.width / 2 - rx + x; // Compute the rotation center x of the target on the SVG coordinate plane
+                        const vry = this.height / 2 - ry - y; // Compute the rotation center y of the target on the SVG coordinate plane
+                        const vx = this.width / 2 + x; // Compute the x position of the target on the SVG coordinate plane
+                        const vy = this.height / 2 - y; // Compute the y position of the target on the SVG coordinate plane
                         use.setAttribute('x', '' + vrx); // Set the rendered x position
                         use.setAttribute('y', '' + vry); // Set the rendered y position
                         const transform = []; // Store any necessary transformations to apply in order for the target to appear with the correct rotation and scale
                         if (direction !== 90 && rotStyle === "all around") { // If the target is not facing exactly upright...
                             transform.push(`rotate(${direction - 90},${vx},${vy})`); // Rotate it!
                         }
-                        if (size !== 1) { // If the target is not exactly its normal size...
+                        if (size !== 100) { // If the target is not exactly its normal size...
                             transform.push(`translate(${vx},${vy})`); // Move it over to the right position
                             if (rotStyle === "left-right" && direction < 0) {
-                                transform.push(`scale(-${size / 100},${size / 100})`);
+                                transform.push(`scale(-${size / (res * 100)},${size / (res * 100)})`);
                             }
                             else {
-                                transform.push(`scale(${size / 100})`); // Scale it from that position
+                                transform.push(`scale(${size / (res * 100)})`); // Scale it from that position
                             }
                             transform.push(`translate(${-vx},${-vy})`); // Move it back to the previous position
                         }
