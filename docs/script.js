@@ -197,6 +197,8 @@ class ScratchSVGThumbnail {
         else { // Otherwise, if it's a raster image (probably a raster image, or any other type of image)
             const image = document.createElementNS('http://www.w3.org/2000/svg', 'image'); // Create an <image> element to render it with
             image.setAttribute('href', `data:image/${key.split('.').pop()};base64,${btoa(file.reduce((acc, v) => acc + String.fromCharCode(v), ''))}`); // Give it the image file as a data uri
+            symbol.setAttribute('width', '200%');
+            symbol.setAttribute('height', '200%');
             symbol.appendChild(image); // Add the <image> element to the <symbol> so it will be included
         }
         return symbol; // Return the costume-turned-symbol back to the caller
@@ -221,6 +223,7 @@ class ScratchSVGThumbnail {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); // Create <svg> element, which will hold everything in the image
         svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); // Make sure it follows <svg> standards (I think that's what that means :)
+        svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink'); // Also make sure it follows deprecated <svg> standards (because of some costumes that need this attribute and are weird like that)
         svg.setAttribute('role', 'img');
         svg.setAttribute('width', '' + this.width); // Will be overriden by ' // _twconfig_' if needed
         svg.setAttribute('height', '' + this.height); // Will be overriden by ' // _twconfig_' if needed
@@ -238,7 +241,16 @@ class ScratchSVGThumbnail {
         /* EMBED RELEVANT COSTUMES AND USE THEM */
         const symbols = {};
         const sortedTargets = []; // Sort the targets by layerOrder to respect layering
-        this.targets.forEach((v) => { var _a; return sortedTargets.splice((_a = v.layerOrder) !== null && _a !== void 0 ? _a : sortedTargets.length, 0, v); });
+        this.targets.forEach(function (t, i) {
+            var _a;
+            const layer = Number((_a = t.layerOrder) !== null && _a !== void 0 ? _a : i);
+            if (sortedTargets[layer]) {
+                sortedTargets.splice(layer, 0, t);
+            }
+            else {
+                sortedTargets[layer] = t;
+            }
+        });
         for (const target of sortedTargets) { // For each target (stage/sprites)...
             if (Array.isArray(target.costumes) && target.costumes.length > 0 && ((_a = target.visible) !== null && _a !== void 0 ? _a : true)) { // If it has a list of costumes present, has at least one costume available, and is visible...
                 const costumeNum = Math.min(Math.max((_b = target.currentCostume) !== null && _b !== void 0 ? _b : 0, 0), target.costumes.length - 1); // Calculate the index of the current costume in the costumes list.
@@ -288,13 +300,14 @@ class ScratchSVGThumbnail {
                         if (direction !== 90 && rotStyle === "all around") { // If the target is not facing exactly upright...
                             transform.push(`rotate(${direction - 90},${vx},${vy})`); // Rotate it!
                         }
-                        if (size !== 100) { // If the target is not exactly its normal size...
+                        const scale = size / (res * 100);
+                        if (scale !== 1) { // If the target is not exactly its normal size...
                             transform.push(`translate(${vx},${vy})`); // Move it over to the right position
                             if (rotStyle === "left-right" && direction < 0) {
-                                transform.push(`scale(-${size / (res * 100)},${size / (res * 100)})`);
+                                transform.push(`scale(-${scale},${scale})`);
                             }
                             else {
-                                transform.push(`scale(${size / (res * 100)})`); // Scale it from that position
+                                transform.push(`scale(${scale})`); // Scale it from that position
                             }
                             transform.push(`translate(${-vx},${-vy})`); // Move it back to the previous position
                         }
