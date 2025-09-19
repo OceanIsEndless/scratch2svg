@@ -18,29 +18,39 @@ Some of these things are probably unnecessary and might not even happen if I fin
 
 - [X] Vector costume support
 - [X] Bitmap costume support
-- [ ] Implement various options to meet different needs
+- [ ] Add configuration options
   - [ ] Don't embed fonts (for use in Scratch since it already has the fonts)
+    - Fonts are currently causing a lot of storage bloat, so add some storage saving options as well:
+      - [ ] Convert &lt;text&gt; elements to &lt;path&gt; elements
+        - Will need to find a good tool or library to do this
+        - Might store paths ahead of time or convert text elements directly depending on implementation
+      - [ ] Keep &lt;text&gt; elements but only include used characters
+        - E.g. if the text in a project only says "Hello!", then encode just the info needed to render "H," "e," "l," "o," and "!" in the embedded font file
+        - Probably need a good libarary for this
+      - Keep &lt;text&gt; elements but choose different font(s)
+        - Saves space but less accurate visually
   - [ ] Transparent background and custom background color
   - [ ] Stage width and height
+    - [ ] Make UI adapt to different stage sizes
     - [ ] Detect stage size from \_twconfig\_ comment
   - [ ] Convert known bitmap costumes to vector
     - E.g. assets from the Scratch costume library that were converted to bitmap or are outdated and have a vector version available
     - Possibly disabled by default due to it being inaccurate to the original
   - [ ] Allow embedding metadata into the SVG
     - [ ] Accessibility info (e.g. title, description)
-    - [ ] scratch2svg data (e.g. project source, tool config, notes on conversion)
+    - [ ] scratch2svg data (e.g. project source, tool config, conversion date)
     - [ ] Project  stuff (e.g. target/costume names, creator username, notes)
     - [ ] Full project files ("lossless" scratch2svg conversion)
+      - [ ] Losslessly compress it somehow to save space
     - [ ] Custom metadata
-      - Whatever the user wants to throw in there I guess?
+      - Whatever the user wants to throw in there I guess
+      - [ ] Allow setting title/description manually
   - [ ] Provide more configuration options as needed
 - [ ] Refine final image
-  - [ ] Optimize storage space
-    - [ ] Shrink fonts
-      - [ ] Choose fonts to use in place of Scratch ones (URL, web safe fonts)
-      - [ ] Subset fonts (only include letters that are used by the project)
+  - [ ] Optimize storage space (only encode exactly what is necessary)
   - [ ] Make sure it follows SVG semantics
-    - [ ] Accessibility things
+    - [ ] Include all necessary attributes, elements, fallbacks?, etc
+    - [ ] Bring outdated stuff like xlink up-to-date to make it futureproof
 - [ ] Support loading projects from as many sources as possible ("for fun")
   - [ ] Local files
     - [X] `.sb3` (Scratch 3 project .zip)
@@ -66,25 +76,14 @@ Some of these things are probably unnecessary and might not even happen if I fin
     - [ ] Allow dragging and dropping files/links anywhere on the page
     - [ ] Make a simple settings window for configuring the final images
     - [ ] Show buttons for interacting with generated SVGs (e.g. download)
+      - This would probably be nicer than hoping the user is able to right-click &gt; "Save Image As..."
 - [ ] Allow including variable monitors
   - Their appearances will have to be recreated in a vector format
-  - It might also be cool to be able to choose a Scratch version for it to look like and/or have it automatically determine appearance based on the version of Scratch the project was created in
     - [ ] Normal readout
-      - [ ] Scratch 3
-      - [ ] Scratch 2
-      - [ ] Scratch 1
     - [ ] Large readout
-      - [ ] Scratch 3
-      - [ ] Scratch 2
-      - [ ] Scratch 1
     - [ ] List monitor
-      - [ ] Scratch 3
-      - [ ] Scratch 2
-      - [ ] Scratch 1
     - [ ] Slider
-      - [ ] Scratch 3
-      - [ ] Scratch 2
-      - [ ] Scratch 1
+  - [ ] Make sure it's the right color
 - [ ] Turn it into a Scratch Addon and/or add a project player to the tool page so that projects can be saved while they're running
   - Useful because a lot of stuff only exists at runtime and isn't saved to the project file such as clones
   - [ ] Implement baseline functionality (generate thumbnail from targets as usual)
@@ -97,34 +96,52 @@ Some of these things are probably unnecessary and might not even happen if I fin
         - Though if supported, high quality pen might just be the default for this tool anyway
   - [ ] Support graphic effects
     - Challenging to vectorize, and may require two different implementations between bitmap/vector costumes depending on how I go about it
-    - [ ] Color effect
+    - [ ] Color effect (idk if easy)
       - [ ] Black and white when color effect is `Infinity`
-    - [ ] Fisheye effect
+    - [ ] Fisheye effect (could be impossible)
       - [ ] Backwards
-    - [ ] Whirl effect
+    - [ ] Whirl effect (maybe impossible)
       - [ ] Backwards
-    - [ ] Pixelate effect
-    - [ ] Mosaic effect
-    - [ ] Brightness effect
-    - [ ] Ghost effect (probably the easiest)
+    - [ ] Pixelate effect (I have no idea what this entails)
+    - [ ] Mosaic effect (probably slightly easy)
+    - [ ] Brightness effect (second easiest)
+    - [ ] Ghost effect (the easiest)
   - [ ] Support say/think bubbles
     - Their appearances will have to be recreated in a vector format
     - [ ] Say bubble
-      - [ ] Scratch 3
-      - [ ] Scratch 2
-      - [ ] Scratch 1
     - [ ] Think bubble
-      - [ ] Scratch 3
-      - [ ] Scratch 2
-      - [ ] Scratch 1
-  - [ ] Support showing/hiding monitors
+  - [ ] Suport ask and wait box
+- [ ] Support making it look like different Scratch versions
+  - [ ] Scratch 2
+    - [ ] Variable monitors
+    - [ ] Graphic effects
+    - [ ] Say/think bubbles
+    - [ ] Any other minor inconsistencies
+  - [ ] Scratch 1
+    - [ ] Variable monitors
+    - [ ] Graphic effects
+    - [ ] Say/think bubbles
+    - [ ] Any other minor inconsistencies
+  - [ ] Scratch 0
+    - [ ] If there's anything different on this front then... um... recreate it!
+  - [ ] &lt;insert anything else here&gt;
+    - [ ] High contrast make variable monitors look different?
+    - [ ] Mods of Scratch change the accent color (variable monitors, ask and wait box)?
+  - If I miraculously manage to do both this AND make the project functional, I would likely have attained perfection and created a universal runtime which supports all versions of Scratch, thus making running the Scratch 2 and Scratch 1 projects and any other projects possible. Though it would be at this point that I should probably reconsider my life choices
 - [ ] Go crazy and add an option to embed &lt;script&gt; tags that will make the project functional!!1!... somehow
   - [ ] Embed all assets when enabled (since it will actually be functional)
   - [ ] Port Scratch Everywhere! to... SVG?? 😵‍💫
+  - Joking, not going to fork Scratch Everywhere!, though I may reference it?
+    - When the WASM port happens, could maybe use that if it works for this magically idk anymore
+    - [ ] Support updating monitors, applying graphic effects to sprites, etc (expose relevant functions needed for rendering at runtime)
+      - Anything that was preprocessed must be overhauled
+    - [ ] Make runtime work (at this point I'm either cooking or cooked)
   - [ ] Make sure everything works OK
     - On a level that is "good enough"
   - This might not actually happen but worth a shot?...
 - [ ] 🎉 Maybe make it more modular for use elsewhere or something idk but DONE!
+
+As you can see I am overly ambitious, and it is probably the death of any real project I hope to complete. Baby steps I guess. :&gt;
 
 ## Credits
 
