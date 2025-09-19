@@ -213,7 +213,7 @@ class ScratchSVGThumbnail {
     }
     get img() {
         const imgElement = document.createElement('img');
-        imgElement.src = `data:image/svg+xml;base64,${btoa(this.svg.outerHTML)}`;
+        imgElement.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(this.svg.outerHTML)}`;
         imgElement.alt = this.name;
         imgElement.title = this.name;
         return imgElement;
@@ -352,6 +352,7 @@ if (input && input.tagName === 'INPUT') {
                 while (output.firstChild) { // Remove previously rendered images
                     output.removeChild(output.firstChild);
                 } // And then proceed with loading...
+                output.appendChild(document.createElement('hr')); // Separator for style
             }
             for (const file of files) { // For each file
                 const thumb = new ScratchSVGThumbnail();
